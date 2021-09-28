@@ -14,6 +14,7 @@ password="12345"
 3) Use the package manager pip to install [MYSQL-python](https://pypi.org/project/MySQL-python/).
 ```bash
 pip install MySQL-python
+pip install pandas
 ```
 MYSQL-python is a connector that is used to make SQL queries in python.
 
@@ -79,6 +80,6 @@ CREATE TABLE aggregate AS SELECT name, count(*) as no_of_products
 2) Haven't put in docker container yet
 
 ## Improvement to be done if provided more days
-1) I'll be parallelize the task to run as effectiently as possible
-2) I'll refactor the code
-3) I'll put in a docker container to be more accessible
+1) I am still working on the approaches on parallel processing. I'll be parallelize the task asap to run it as effectiently as possible
+2) I'll refactor the code and make it much more understandable
+3) I'm working on the docker container and if provided more time I'll do it too.

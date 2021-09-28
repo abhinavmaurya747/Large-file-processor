@@ -40,13 +40,21 @@ class databaseAPI:
     # check variables
     DB_EXISTS = False
     TB_EXISTS = False
+
+    # database connection variable and its pointing cursor
     mydb,mycursor =None, None
 
     def __init__(self):
         pass
 
     def connect_to_sql(self,  u="root", pwd="12345"):
-        # Connect to sql and check if our database exists
+        '''
+            Connects to sql and updates the connection and its pointing cursor in mydb, mycursor
+            
+            u : username of the database to access
+            pwd : password of the database having username u
+        '''
+        
         self.mydb = mysql.connector.connect(
             host="localhost",
             user=u,
@@ -55,7 +63,9 @@ class databaseAPI:
         self.mycursor = self.mydb.cursor()
 
     def check_db(self):
-        # Check if the database exists or not and update the DBEXISTS variable
+        '''
+            Checks if our database exists on our server  or not and update the DBEXISTS variable
+        '''
         self.mycursor.execute("SHOW DATABASES")
         for x in self.mycursor:
             if x[0] == 'csvdb':
@@ -64,6 +74,9 @@ class databaseAPI:
         
 
     def create_db(self):
+        '''
+            Check if database exists or not. If not then create the database 'csvdb'
+        '''
         self.check_db()
         # If the database 'csvdb' doesn't exists then create it
         if self.DB_EXISTS == False:
@@ -72,6 +85,13 @@ class databaseAPI:
 
 
     def connect_db(self, u="root", pwd="12345", db="csvdb"):
+        '''
+            Connects to sql and updates the connection and its pointing cursor in mydb, mycursor
+            
+            u : username of the database to access
+            pwd : password of the database having username u
+            db : name of the database to connect. In our case it is csvdb
+        '''
         # Connect to our MYSQL database
         self.mydb = mysql.connector.connect(
             host="localhost",
@@ -82,6 +102,9 @@ class databaseAPI:
         self.mycursor = self.mydb.cursor()
 
     def check_table(self):
+        '''
+            Check if the products table exists in the database
+        '''
         # Check if products table exists
         self.mycursor.execute("SHOW TABLES")
         for x in self.mycursor:
@@ -91,6 +114,9 @@ class databaseAPI:
            
 
     def drop_table(self):
+        '''
+            Drop the table products from the database
+        '''
         # To drop a table
         self.mycursor.execute("DROP TABLE products")
         self.TB_EXISTS = False
@@ -98,6 +124,9 @@ class databaseAPI:
 
 
     def create_table(self):
+        '''
+            It check the existence of the products table. If not present then it is created.
+        '''
         self.check_table()
         # Create the table if it doesn't exists
         if  self.TB_EXISTS == False:
@@ -107,6 +136,16 @@ class databaseAPI:
 
 
     def upload_to_db(self , data):
+        '''
+            This is the main function that takes in data and uploads it to the database.
+            There are several approaches to it. Either upload single rows or multiple at a time.
+            Both are tested.
+            Still concurrency is to be performed.
+            
+            data : the data which needs to be uploaded to the database.
+                    Since this data was imported from a csv file using pandas it is in DataFrame form.
+                    It needs to be converted into tuples to upload in database.
+        '''
         # Add data from csv file to database
         sql_ins_prod = "REPLACE INTO products VALUES(%s, %s, %s)"
         val = list(data.to_numpy())
@@ -115,15 +154,17 @@ class databaseAPI:
         t0 = time.time()
         print("GOING TO UPLOAD!")
         
-        '''
+        
         #Passing 1 value at a time
+        '''
         for i in range(len(val)):
             print(val[i])
             if (i+1)%10000 == 0 and i != 0:
                 print(i," values inserted!")
             self.mycursor.execute(sql_ins_prod, val[i])
         '''
-        PROCESS_LIM = 20000
+
+        PROCESS_LIM = 20000 # Number of rows inserted in a single iteration
         for i in range(len(val)//PROCESS_LIM):
             self.mycursor.executemany(sql_ins_prod, val[i*PROCESS_LIM:(i+1)*PROCESS_LIM])   
             print("Inserted {} values".format((i+1)*PROCESS_LIM))
@@ -136,6 +177,10 @@ class databaseAPI:
         print("all values with unique sku column inserted!")
 
     def list_info(self):
+        '''
+            This function lists the basic information about the tables present in the database.
+            
+        '''
         self.mycursor.execute("SELECT COUNT(name) FROM products")
         print("Number of rows in products table: {}".format([i[0] for i in self.mycursor][0]))
         self.mycursor.execute("SELECT COUNT(name) FROM aggregate")
@@ -160,6 +205,11 @@ class databaseAPI:
         print("Total Rows in db ", c)
         '''
     def create_aggregate_table(self):
+        '''
+            The function first checks for the presence of the aggregate table. If not present then it is created.
+            The aggregate table is created by selecting names from products table and the number of products for each name.
+            
+        '''
         exists = False
         self.mycursor.execute("SHOW TABLES")
         for x in self.mycursor:
@@ -193,6 +243,7 @@ if __name__ == '__main__':
     print(time.time()-t)
     db.create_aggregate_table()
 
+    # Still working on the parallel processing part
     '''
     pool = Pool()
     pool.apply_async(upload_to_db, args=(db, data))

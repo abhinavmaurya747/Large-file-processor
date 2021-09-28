@@ -80,6 +80,6 @@ CREATE TABLE aggregate AS SELECT name, count(*) as no_of_products
 2) Haven't put in docker container yet
 
 ## Improvement to be done if provided more days
-1) I am still working on the approaches on parallel processing. I'll be parallelize the task asap to run it as effectiently as possible
+1) I am still working on the approaches on parallel processing. I'll be parallelize the task asap to run it as effeciently as possible
 2) I'll refactor the code and make it much more understandable
-3) I'm working on the docker container and if provided more time I'll do it too.
+3) I'm working on the docker container and if provided more time I'll do it too. I'll move the database to server so that it's easily accessible from anywhere.

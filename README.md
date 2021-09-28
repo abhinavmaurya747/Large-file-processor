@@ -34,6 +34,18 @@ In case of a sku value match it will simply update the existing value
 
 
 ## Details of all the tables and their schema
+2 tables are created. products table is created for data ingestion from the csv file. aggregate table is created to contains name, no. of products
+
+```mysql
+CREATE TABLE products (
+    name VARCHAR(255) NOT NULL, sku VARCHAR(255) NOT NULL PRIMARY KEY, 
+    description VARCHAR(1024) NOT NULL
+    );
+    
+CREATE TABLE aggregate AS SELECT name, count(*) as no_of_products
+    FROM products GROUP BY name;
+```
+
 
 ## Done from points to achieve:
 1) Your code should follow concept of OOPS
